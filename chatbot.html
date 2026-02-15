@@ -29,7 +29,7 @@
 
         function ChatMessage({ message, sender }) {
 
-            return (
+            return ( // && (AND OPERATOR) can be used as an alternative for if-else statements
                 <div>
                     {sender === "robot" && <img src="./images/robot.png" width="50" />}
                     {message}
@@ -39,7 +39,8 @@
         }
 
         function ChatMessages() {
-            const chatMessages = [{
+
+            const array = React.useState([{
                 message: "hello chatbot",
                 sender: "user",
                 id: "id1"
@@ -47,10 +48,28 @@
                 message: "roll a dice",
                 sender: "robot",
                 id: "id2"
-            }];
+            }]);
+
+            const chatMessages = array[0];
+
+            const setChatMessages = array[1];
+
+            function sendMessage() {
+                setChatMessages([
+                    ...chatMessages,
+                    {
+                        message: "test",
+                        sender: "user",
+                        id: crypto.randomUUID()
+                    }
+                ]);
+                console.log(array);
+            }
 
             return (
                 <>
+                    <button onClick={sendMessage}>Send Message</button>
+
                     {chatMessages.map((chatMessage) => {
                         return (
                             <ChatMessage
