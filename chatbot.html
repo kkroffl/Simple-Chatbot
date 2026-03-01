@@ -28,7 +28,6 @@
         }
 
         function ChatMessage({ message, sender }) {
-
             return ( // && (AND OPERATOR) can be used as an alternative for if-else statements
                 <div>
                     {sender === "robot" && <img src="./images/robot.png" width="50" />}
@@ -45,7 +44,7 @@
                 sender: "user",
                 id: "id1"
             }, {
-                message: "roll a dice",
+                message: "hello, how can i help you?",
                 sender: "robot",
                 id: "id2"
             }]);
