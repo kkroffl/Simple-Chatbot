@@ -2,7 +2,74 @@
 <html>
 
 <head>
-    <title>React Basics</title>
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .send-button {
+            color: white;
+            background-color: green;
+            /* make height match input using same padding + line-height or explicit height */
+            padding: 12px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .chat-input {
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 15px;
+            border-width: 1px;
+            flex-grow: 1;
+        }
+
+        .app-container {
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .chat-message-user {
+            display: flex;
+            justify-content: end;
+            align-items: start;
+        }
+
+        .chat-message-robot {
+            display: flex;
+            justify-content: start;
+            align-items: start;
+        }
+
+        .chat-message-text {
+            background-color: whitesmoke;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-right: 10px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+            max-width: 300px;
+        }
+
+        .chat-messages-container {
+            flex-grow: 1;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 
 <body>
@@ -11,64 +78,93 @@
     <script src="https://unpkg.com/supersimpledev/react.js"></script>
     <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
 
+    <script src="https://unpkg.com/supersimpledev/chatbot.js"></script>
+
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
     <script type="text/babel">
+        function ChatInput({ chatMessages, setChatMessages }) {
+            const [inputText, setInputText] = React.useState('');
 
-        function ChatInput() { // component (can be reused)
+            function saveInputText(event) {
+                setInputText(event.target.value);
+            }
+
+            function sendMessage() {
+                const newChatMessages = [
+                    ...chatMessages,
+                    {
+                        message: inputText,
+                        sender: 'user',
+                        id: crypto.randomUUID()
+                    }
+                ];
+
+                setChatMessages(newChatMessages);
+
+                const response = Chatbot.getResponse(inputText);
+                setChatMessages([
+                    ...newChatMessages,
+                    {
+                        message: response,
+                        sender: 'robot',
+                        id: crypto.randomUUID()
+                    }
+                ]);
+
+                setInputText('');
+            }
+
             return (
-                <>
+                <div className="chat-input-container">
                     <input
                         placeholder="Send a message to Chatbot"
                         size="30"
+                        onChange={saveInputText}
+                        value={inputText}
+                        className="chat-input"
                     />
-
-                    <button>Send</button>
-                </> // fragments instead of <div></div>
-            );
-        }
-
-        function ChatMessage({ message, sender }) {
-            return ( // && (AND OPERATOR) can be used as an alternative for if-else statements
-                <div>
-                    {sender === "robot" && <img src="./images/robot.png" width="50" />}
-                    {message}
-                    {sender === "user" && <img src="./images/user.png" width="50" />}
+                    <button
+                        onClick={sendMessage}
+                        className="send-button"
+                    >Send</button>
                 </div>
             );
         }
 
-        function ChatMessages() {
+        function ChatMessage({ message, sender }) {
+            // const message = props.message;
+            // const sender = props.sender;
+            // const { message, sender } = props;
 
-            const array = React.useState([{
-                message: "hello chatbot",
-                sender: "user",
-                id: "id1"
-            }, {
-                message: "hello, how can i help you?",
-                sender: "robot",
-                id: "id2"
-            }]);
-
-            const chatMessages = array[0];
-
-            const setChatMessages = array[1];
-
-            function sendMessage() {
-                setChatMessages([
-                    ...chatMessages,
-                    {
-                        message: "test",
-                        sender: "user",
-                        id: crypto.randomUUID()
-                    }
-                ]);
-                console.log(array);
+            /*
+            if (sender === 'robot') {
+              return (
+                <div>
+                  <img src="robot.png" width="50" />
+                  {message}
+                </div>
+              );
             }
+            */
 
             return (
-                <>
-                    <button onClick={sendMessage}>Send Message</button>
+                <div className={sender === "user" ? "chat-message-user" : "chat-message-robot"}>
+                    {sender === 'robot' && ( // using AND operator (&&) as conditional statement 
+                        <img src="./images/robot.png" width="50" />
+                    )}
+                    <div className="chat-message-text">
+                        {message}
+                    </div>
+                    {sender === 'user' && (
+                        <img src="./images/user.png" width="50" />
+                    )}
+                </div>
+            );
+        }
 
+        function ChatMessages({ chatMessages }) {
+            return (
+                <div className="chat-messages-container">
                     {chatMessages.map((chatMessage) => {
                         return (
                             <ChatMessage
@@ -78,22 +174,47 @@
                             />
                         );
                     })}
-                </>
+                </div>
             );
         }
 
         function App() {
+            const [chatMessages, setChatMessages] = React.useState([{
+                message: 'hello chatbot',
+                sender: 'user',
+                id: 'id1'
+            }, {
+                message: 'Hello! How can I help you?',
+                sender: 'robot',
+                id: 'id2'
+            }, {
+                message: 'can you get me todays date?',
+                sender: 'user',
+                id: 'id3'
+            }, {
+                message: 'Today is September 27',
+                sender: 'robot',
+                id: 'id4'
+            }]);
+            // const [chatMessages, setChatMessages] = array;
+            // const chatMessages = array[0];
+            // const setChatMessages = array[1];
+
             return (
-                <>
-                    <ChatInput />
-                    <ChatMessages />
-                </>
+                <div className="app-container">
+                    <ChatMessages
+                        chatMessages={chatMessages}
+                    />
+                    <ChatInput
+                        chatMessages={chatMessages}
+                        setChatMessages={setChatMessages}
+                    />
+                </div>
             );
         }
 
         const container = document.querySelector('.js-container');
         ReactDOM.createRoot(container).render(<App />);
-
     </script>
 </body>
 
